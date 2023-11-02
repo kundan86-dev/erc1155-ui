@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Web3 from "web3"; // Corrected import statement
-import abi from "./StakingContractABI.json";
+import abi from "./ContractABI.json";
 import "./App.css";
 
 const provider = new Web3(window.ethereum);
@@ -12,17 +12,16 @@ const App = () => {
   const [account, setAccount] = useState("");
   const [balance, setBalance] = useState("");
   const [contracts, setContracts] = useState("");
-  const [formData, setFormData] = useState({
-    account: "",
+
+  const [formData, setFormData] = useState({ account: "", amount: "" });
+
+  const [tfrData, setTfrData] = useState({
+    from: "",
+    to: "",
+    newId: "",
     amount: "",
-    id: "",
   });
-  // const [tfrData, setTfrData] = useState({
-  //   from: "",
-  //   to:"",
-  //   id: "",
-  //   amount: ""
-  // });
+
   const [txHash, setTxhash] = useState("");
 
   const handleChange = (e) => {
@@ -31,30 +30,32 @@ const App = () => {
       [e.target.id]: e.target.value,
     });
   };
-  // const handleTfr = (e) => {
-  //   setTfrData({
-  //     ...tfrData,
-  //     [e.target.id]: e.target.value,
-  //   });
-  // };
+  const handleTfr = (e) => {
+    setTfrData({
+      ...tfrData,
+      [e.target.id]: e.target.value,
+    });
+  };
 
   const mintingToken = async (e) => {
     e.preventDefault();
 
-    if (!formData.account || !formData.amount || !formData.id) {
-      console.error(
-        "Invalid input: Account, Amount, and Token ID are required."
-      );
+    if (!formData.account || !formData.amount) {
+      console.error("Invalid input: Account and Amount are required.");
       return;
     }
-
     const amount = parseInt(formData.amount);
-    const tokenId = parseInt(formData.id);
+
+    if (isNaN(amount) || amount <= 0) {
+      console.error("Invalid input: Amount must be a positive integer.");
+      return;
+    }
+    console.log("Minting Token Input:", { account: formData.account, amount });
 
     try {
       const gasPrice = await provider.eth.getGasPrice();
       let dataa = await contract.methods
-        .transferMint(formData.from, tokenId, amount)
+        .mintt(formData.account, formData.amount)
         .encodeABI();
 
       const rawTransaction = {
@@ -75,42 +76,53 @@ const App = () => {
     }
   };
 
-  // const transferToken = async (e) => {
-  //   e.preventDefault();
+  const transferToken = async (e) => {
+    e.preventDefault();
 
-  //   if (!formData.from || !formData.too || !formData.id || !formData.amount) {
-  //     console.error(
-  //       "Invalid input: From, To,Token ID and Amount are required."
-  //     );
-  //     return;
-  //   }
+    if (!tfrData.from || !tfrData.to || !tfrData.newId || !tfrData.amount) {
+      console.error(
+        "Invalid input: From, To,Token ID and Amount are required."
+      );
+      return;
+    }
 
-  //   const amount = parseInt(formData.amount);
-  //   const tokenId = parseInt(formData.id);
+    const newId = parseInt(tfrData.newId);
+    const amount = parseInt(tfrData.amount);
+    if (isNaN(newId) || isNaN(amount) || newId <= 0 || amount <= 0) {
+      console.error(
+        "Invalid input: Token ID and Amount must be positive integers."
+      );
+      return;
+    }
 
-  //   try {
-  //     const gasPrice = await provider.eth.getGasPrice();
-  //     let dataa = await contract.methods
-  //       .transferToken(formData.from,too,tokenId, amount)
-  //       .encodeABI();
+    try {
+      const gasPrice = await provider.eth.getGasPrice();
+      let dataa = await contract.methods
+        .safeTransferFromm(
+          tfrData.from,
+          tfrData.to,
+          tfrData.newId,
+          tfrData.amount
+        )
+        .encodeABI();
 
-  //     const rawTransaction = {
-  //       from: accounts[0],
-  //       gasPrice: gasPrice,
-  //       gas: 650000,
-  //       to: contractAddress,
-  //       data: dataa,
-  //       chainId: 11155111,
-  //     };
-  //     const signedTx = await provider.eth.sendTransaction(rawTransaction);
+      const rawTransaction = {
+        from: accounts[0],
+        gasPrice: gasPrice,
+        gas: 650000,
+        to: contractAddress,
+        data: dataa,
+        chainId: 11155111,
+      };
+      const signedTx = await provider.eth.sendTransaction(rawTransaction);
 
-  //     setTxhash(
-  //       `Token transfer successfully with txn hash(${signedTx.transactionHash})`
-  //     );
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
+      setTxhash(
+        `Token transfer successfully with txn hash(${signedTx.transactionHash})`
+      );
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   const connectMetamask = async (e) => {
     try {
@@ -119,7 +131,12 @@ const App = () => {
         accounts = await provider.eth.requestAccounts();
 
         if (accounts.length > 0) {
-          setAccount(`Connected Account: ${accounts[0]}`);
+          setAccount(
+            `The metamask wallet : Connected Account: ${accounts[0].substring(
+              0,
+              6
+            )}....${accounts[0].substring(36)}`
+          );
           alert("Connected ", accounts[0]);
         } else {
           console.error("No Ethereum accounts available.");
@@ -135,9 +152,9 @@ const App = () => {
   const connectContract = async (e) => {
     e.preventDefault();
     try {
-      contractAddress = "0xA779Ca5BF5ee5ef26635d593260c9684dE1cc0f4";
+      contractAddress = "0x27Cd1390CB65A42AB8a2d13fAEA4b23A96B80315";
       contract = new provider.eth.Contract(abi, contractAddress);
-      setContracts(`Connected with(${contractAddress}) contract Address`);
+      setContracts(`The contract is : Connected with(${contractAddress}) contract Address`);
       alert("Contract connected");
       console.log("Contract is connected");
     } catch (error) {
@@ -149,7 +166,7 @@ const App = () => {
     try {
       const weiBalance = await provider.eth.getBalance(accounts[0]);
       const etherBalance = provider.utils.fromWei(weiBalance, "ether");
-      setBalance(`Wallet Balance: ${parseFloat(etherBalance)} ETH`);
+      setBalance(`The balance in wallet is: ${(etherBalance)} ETH`);
     } catch (error) {
       console.error("Error fetching wallet balance:", error);
     }
@@ -157,57 +174,60 @@ const App = () => {
 
   return (
     <div className="App">
-      <div className="container">
-        <h1>Erc 1155</h1>
-        <div>
-          <button onClick={connectMetamask}>Connect MetaMask</button>
-          <p>The metamask wallet: {account}</p>
-          <button onClick={getWalletBalance} className="btn">
-            Get Balance
-          </button>
-          <p>The balance in wallet is: {balance}</p>
-          <button onClick={connectContract}>Connect contract</button>
-          <p>The contract is: {contracts}</p>
-          <form onSubmit={mintingToken}>
-            <div>
-              <label>Address:</label>
-              <input type="text" id="account" onChange={handleChange} />
-            </div>
-            <div>
-              <label>Amount:</label>
-              <input type="number" id="amount" onChange={handleChange} />
-            </div>
-            <div>
-              <label>TokenId:</label>
-              <input type="number" id="id" onChange={handleChange} />
-            </div>
-            <button type="submit">Mint</button>
-            <div>
-              <p>{txHash}</p>
-            </div>
-          </form>
-          {/* <form onSubmit={transferToken}> 
-        <div>
-            <label>From Address:</label>
-            <input type="text" id="from" onChange={tfrData} />
+      <h1>ERC-1155 Dapp</h1>
+      <div className="main">
+        <div className="connection">
+          <div>
+            <button onClick={connectMetamask}>Connect MetaMask</button>
+            <p>{account}</p>
           </div>
           <div>
-            <label>To Address:</label>
-            <input type="text" id="to" onChange={tfrData} />
+            <button onClick={getWalletBalance}>Get Balance</button>
+            <p>{balance}</p>
           </div>
           <div>
-            <label>SetId:</label>
-            <input type="text" id="id" onChange={tfrData} />
+            <button onClick={connectContract}>Connect contract</button>
+            <p>{contracts}</p>
+          </div>
+        </div>
+
+        <div className="mint">
+          <div>
+            <label>Address:</label>
+            <input type="text" id="account" onChange={handleChange} />
           </div>
           <div>
             <label>Amount:</label>
-            <input type="text" amt="from" onChange={tfrData} />
+            <input type="number" id="amount" onChange={handleChange} />
+          </div>
+          <button onClick={mintingToken}>Mint</button>
+          <div>
+            <p>{txHash}</p>
+          </div>
+        </div>
+        <div className="transfer">
+          <div>
+            <label>Address:</label>
+            <input type="text" id="from" onChange={handleTfr} />
           </div>
           <div>
-          <button type="submit">Transfer</button>
+            <label>To Address:</label>
+            <input type="text" id="to" onChange={handleTfr} />
           </div>
-         
-        </form> */}
+          <div>
+            <label>SetId:</label>
+            <input type="text" id="newId" onChange={handleTfr} />
+          </div>
+          <div>
+            <label>Amount:</label>
+            <input type="text" id="amount" onChange={handleTfr} />
+          </div>
+          <div>
+            <h3>
+              <button onClick={transferToken}>Transfer</button>
+            </h3>
+            <p>{txHash}</p>
+          </div>
         </div>
       </div>
     </div>

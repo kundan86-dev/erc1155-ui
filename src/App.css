@@ -1,3 +1,106 @@
-.container{
-  background-color: aquamarine;
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: 20px;
+}
+
+.connection,
+.mint,
+.transfer {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  margin: 10px;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"] {
+  width: calc(100% - 4px);
+  padding: 8px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.transfer button {
+  margin-top: 10px;
+}
+
+p {
+  margin: 10px 0;
+}
+
+/* Media queries for responsiveness */
+@media screen and (min-width: 768px) {
+  /* .connection, */
+  .mint,
+  .transfer {
+    width: 45%; /* Two columns for tablets and larger screens */
+  }
+
+}
+
+@media screen and (min-width: 1024px) {
+  .connection,
+  .mint,
+  .transfer {
+    width: 30%; /* Three columns for larger screens */
+  }
+}
+@media screen and (min-width: 768px) {
+  .button {
+    background-color: #4caf50;
+     color: white;
+     border: none; 
+     padding: 10px 20px;
+     font-size: 16px;
+     border-radius: 5px;
+     cursor: pointer;
+     margin-bottom: 10px;
+     width: 45%;
+     box-sizing: border-box;
+   }
+ 
 }
